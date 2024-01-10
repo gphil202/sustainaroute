@@ -5,8 +5,13 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import pandas as pd
 
-list_of_files = ["data_2.json", "data_2_incomplete.json", "data_3.json", "data_3.json", "data_4.json",
-                 "data_run1_may_be_incomplete.json", "data_5.json", "data_6.json", "data_7.json", "data_8.json"]
+# list_of_files = ["data_2.json", "data_2_incomplete.json", "data_3.json", "data_3.json", "data_4.json",
+#                  "data_run1_may_be_incomplete.json", "data_5.json", "data_6.json", "data_7.json", "data_8.json"]
+
+list_of_files = ["data_9.json", "data_10.json", "data_11.json", "data_12.json", "data_13.json", "data_14.json",
+                 "data_15.json", "data_16.json"]
+
+existing_frame = pd.read_csv('results.csv')
 
 
 def extract_members() -> set:
@@ -30,13 +35,14 @@ def extract_members() -> set:
                     to_add = to_add[:-len("cdn-")]
                 members_set.add(to_add)
 
+    members_set = members_set.difference(set(existing_frame['username'].to_list()))
     print(f"Extracted {len(members_set)} members")
     return members_set
 
 
 def download_profile_data(members_set: set):
     website = "https://nomadlist.com/"
-    df = pd.DataFrame()
+    df = existing_frame # pd.DataFrame()
     for member in tqdm(members_set):
         html_data = requests.get(website + member).text
         soup = BeautifulSoup(html_data, "html.parser")
@@ -84,7 +90,7 @@ def download_profile_data(members_set: set):
         print(f"\nadding entry to dataframe: {arg_dict}")
         df = pd.concat([df, new_df.transpose()])
 
-    df.to_csv("travel_info_profiles.csv", encoding='utf-8', index=False)
+    df.to_csv("results.csv", encoding='utf-8', index=False)
     print(f"Exported {len(df)} entries to csv")
 
 

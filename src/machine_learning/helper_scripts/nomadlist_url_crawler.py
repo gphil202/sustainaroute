@@ -129,6 +129,6 @@ while counter != 0:
 	print("")
 	dict_links = dict_links2
 	# Save list in json file
-	a_file = open("data_8.json", "w")
+	a_file = open("data_16.json", "w")
 	json.dump(dict_links, a_file)
 	a_file.close()
