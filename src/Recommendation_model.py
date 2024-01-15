@@ -40,7 +40,7 @@ def extract_countries(city_country_list):
 
 df1['visited_countries'] = df1['visited'].apply(lambda x: extract_countries(eval(x)))
 df1['nomadlist_countries'] = df1['nomadlist_recommends'].apply(lambda x: extract_countries(eval(x)))
-#eval wandelt die Liste von Zeichen in Strings um 
+
 
 print(df1[['visited_countries', 'nomadlist_countries']].head())
 
