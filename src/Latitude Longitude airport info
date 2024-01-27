@@ -1,6 +1,6 @@
 
 
-Use the haversine formula to calculate the distance between two points given their longitude and latitude in Python. Here's an example of how you can implement it:
+haversine formula to calculate the distance between two points given their longitude and latitude in Python (ex)
 
 ```
 from math import radians, sin, cos, sqrt, atan2
