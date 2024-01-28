@@ -10,7 +10,7 @@ from enum import Enum
 # CO2 values are in kg if not stated otherwise
 
 
-class CarDiesel(Enum, float):
+class CarDiesel(float, Enum):
     CO2_PER_TONNE = 3032.89
     WTT_CO2_PER_TONNE = 720.72857
     CO2_PER_LITER = 2.56
@@ -21,7 +21,7 @@ class CarDiesel(Enum, float):
     kWh_PER_km = 0.66889
 
 
-class CarPetrol(Enum, float):
+class CarPetrol(float, Enum):
     CO2_PER_TONNE = 2903.08
     WTT_CO2_PER_TONNE = 824.1216
     CO2_PER_LITER = 2.16
@@ -32,7 +32,7 @@ class CarPetrol(Enum, float):
     kWh_PER_km = 0.71321
 
 
-class MarineFuel(Enum, float):
+class MarineFuel(float, Enum):
     CO2_PER_TONNE = 3159.5
     WTT_CO2_PER_TONNE = 709.08076
     CO2_PER_LITER = 3.11
@@ -41,7 +41,7 @@ class MarineFuel(Enum, float):
     WTT_CO2_PER_kWh = 0.06264
 
 
-class AviationFuel(Enum, float):
+class AviationFuel(float, Enum):
     CO2_PER_TONNE = 3181.43
     WTT_CO2_PER_TONNE = 658.57016
     CO2_PER_LITER = 2.55
@@ -50,7 +50,7 @@ class AviationFuel(Enum, float):
     WTT_CO2_PER_kWh = 0.054
 
 
-class AirTravelEmissionsPerPassengerKm(Enum, float):
+class AirTravelEmissionsPerPassengerKm(float, Enum):
     DOMESTIC_UK_AVERAGE = 0.24587
     WTT_DOMESTIC_UK_AVERAGE = 0.02691
     UK_TO_EU_AVERAGE = 0.51353
@@ -81,16 +81,16 @@ class AirTravelEmissionsPerPassengerKm(Enum, float):
     WTT_UK_TO_NON_UK_FIRST = 0.06159
 
 
-class Ferry(Enum, float):
+class Ferry(float, Enum):
     FOOT_PASSENGER = 0.01874
     WTT_FOOT_PASSENGER = 0.00421
-    CAR_PASSENGER = 0.012952
+    CAR_PASSENGER = 0.12952
     WTT_CAR_PASSENGER = 0.02909
     AVERAGE_CAR = 0.11286
     WTT_AVERAGE_CAR = 0.02535
 
 
-class Rail(Enum, float):
+class Rail(float, Enum):
     # emissions per passenger km
     UK_DOMESTIC = 0.03549
     WTT_UK_DOMESTIC = 0.00892
@@ -102,7 +102,7 @@ class Rail(Enum, float):
     WTT_LONDON_UNDERGROUND = 0.00724
 
 
-class HotelStay(Enum, float):
+class HotelStay(float, Enum):
     # emissions per room per night
     AUSTRALIA = 35.0
     BELGIUM = 12.2

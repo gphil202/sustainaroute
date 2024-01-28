@@ -4,9 +4,8 @@ import src.common.coefficients as c
 transport_emission_coefficient_dict: dict = {
         'Petrol Car': c.CarPetrol.CO2_PER_km.value,
         'Diesel Car': c.CarDiesel.CO2_PER_km.value,
-        # 'Ferry': c.MarineFuel.CO2_PER_km.value, # TODO: Using marine fuel for now, will likely want to distinguish between Ferry and Marine somehow
+         'Ferry': c.Ferry.AVERAGE_CAR,
         # 'Flight': c.AviationFuel.CO2_PER_km.value,
-        # 'Boat': c.MarineFuel.CO2_PER_km.value,
         'UK Train': c.Rail.UK_DOMESTIC.value,
         'International Train': c.Rail.INTERNATIONAL.value
 }
@@ -100,10 +99,9 @@ def create_driving_leg(mode: str = "") -> tuple:
 
 if __name__ == '__main__':
     legs = []
-    got_all_entries: bool = False
 
     print("Emissions calculator started. Please enter the legs of your journey one at a time.")
-    while not got_all_entries:
+    while True:
         option = input(f"Leg {len(legs) + 1}: Please choose between 'flight', 'transit', 'driving', 'walking' and "
                        f"'bicycling'. To run the calculation on all previously entered legs, type 'done' ")
 
@@ -119,10 +117,10 @@ if __name__ == '__main__':
 
         else:
             print("Unrecognised response, please choose from listed options")
-            continue
+            break
 
         print(f"Leg from {legs[-1][0]} to {legs[-1][1]} recorded")
 
     total_emissions: float = sum([elem[2] for elem in legs])
     print(f"Legs of Journey: {legs}")
-    print(f"Total emissions: {total_emissions}")
+    print(f"Total emissions: {total_emissions} kg CO2")
