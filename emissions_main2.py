@@ -1,6 +1,6 @@
 import datetime
 import src.common.coefficients2 as c
-# import googlemaps
+import googlemaps
 from datetime import datetime
 
 transport_emission_coefficient_dict: dict = {
@@ -46,7 +46,7 @@ def create_driving_leg(mode: str = "") -> tuple:
         "origin": "",
         "destination": "",
         "mode": mode,
-        "departure_time": datetime.datetime.now()
+        "departure_time": datetime.now()
     }
 
     prompts = ["Please enter the origin address or waypoint ",
@@ -58,29 +58,30 @@ def create_driving_leg(mode: str = "") -> tuple:
 
     start_now = input("Do you want to start now? (yes/no) ")
     if start_now == "yes":
-        query["departure_time"] = datetime.datetime.now()
+        query["departure_time"] = datetime.now()
     else:
         year = input("Please enter the year of your journey ")
         month = input("Please enter the month of your journey as a number (1-12) ")
         day = input("Please enter the day of your journey ")
         hour = input("Please enter the hour when you like to depart (24h-format) ")
         minute = input("Please enter the minute when you like to depart ")
-        query["departureTime"] = datetime.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour),
+        query["departure_time"] = datetime.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour),
                                                    minute=int(minute))
 
+    gmaps = googlemaps.Client(key='AIzaSyA27-jm6gjzs_sQqdiuPM8ZsWaTTItBEMw')
     directions_result = gmaps.directions(query["origin"],
                                          query["destination"],
                                          mode=query["mode"],
-                                         departure_time = query["departureTime"])
+                                         departure_time = query["departure_time"])
 
     primary_query = directions_result[0]
     query_emissions = 0
-    for _, leg in enumerate(query1_result['legs']):
+    for _, leg in enumerate(primary_query['legs']):
         for step in leg["steps"]:
             if step["travel_mode"] == "DRIVING":
-                query_emissions += step["distance"]["value"] * 1000 * 0.19 # transport_emission_coefficient_dict[""]
+                query_emissions += (step["distance"]["value"] / 1000) * 0.19 # transport_emission_coefficient_dict[""]
             elif step["travel_mode"] == "TRANSIT":
-                query_emissions += step["distance"]["value"] * 1000 * 0.05 # transport_emission_coefficient_dict[]
+                query_emissions += (step["distance"]["value"] / 1000) * 0.05 # transport_emission_coefficient_dict[]
             elif step["travel_mode"] == "CYCLING":
                 query_emissions += 0
             elif step["travel_mode"] == "WALKING":
@@ -137,13 +138,11 @@ if __name__ == '__main__':
                 else:
                     print("Could not calculate the distance due to an error.")
 
-
-
             legs.append((location1, location2, emissions))
 
         # Should we add a function for bicycling or walking here which doesn't calculate any emissions but just
         # displays info on its leg? Happy to do that :)
-        elif option == "transport" or option == "driving" or option == "walking" or option == "bicycling":
+        elif option == "transit" or option == "driving" or option == "walking" or option == "bicycling":
             legs.append(create_driving_leg(option))
 
         elif option == "done":
