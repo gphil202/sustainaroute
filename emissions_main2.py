@@ -166,17 +166,7 @@ def create_driving_leg(mode: str = "") -> tuple:
                 query_emissions += 0
 
 
-    # TODO: extract the entries of the query element and call the Google Maps API with them. Then extract all the
-    # TODO: different segments from the result legs and multiply them with the corresponding emission coefficient
-    # TODO: for the respective transit mode
 
-    # # For now, grabbing approximate distance from user and multiplying by transport_emission_coefficient values
-    # if query['carType'] == 'petrol':
-    #     approximate_emissions = transport_emission_coefficient_dict['Petrol Car'] * float(query['approximateDist'])
-    # elif query['carType'] == 'diesel':
-    #     approximate_emissions = transport_emission_coefficient_dict['Diesel Car'] * float(query['approximateDist'])
-    # else:
-    #     raise Exception(f"{query['carType']} is not a valid car option, please re-run and enter either petrol or diesel.")
     return query["origin"], query["destination"], query_emissions
 
 
@@ -206,8 +196,10 @@ if __name__ == '__main__':
                     received_valid_input = True
                     if flight_class == "Economy":
                         emissions = distance * transport_emission_coefficient_dict["Flight Economy"]
-                    elif flight_class == "Premium":
-                        pass
+                    elif flight_class == "Premium Economy":
+                        emissions = distance * transport_emission_coefficient_dict["Flight Premium Economy"]
+                    elif flight_class == "Business":
+                        emissions = distance * transport_emission_coefficient_dict["Flight Business"]
                     elif flight_class == "First":
                         emissions = distance * transport_emission_coefficient_dict["Flight First"]
                     else:
