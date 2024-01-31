@@ -1,3 +1,79 @@
+import pandas as pd
+data_file = "src/machine_learning/helper_scripts/nomadlist_travel_info_separated.csv"
+df = pd.read_csv(data_file)
+df.head()
+
+df1 = df.iloc[:,[1,3]]
+df1.head()
+
+df1['visited'] = df1['cities_visited'].apply(lambda x: eval(x))
+df1['nomadlist_recommends'] = df1['recommended_cities'].apply(lambda x: eval(x))
+print(df1[['visited', 'nomadlist_recommends']].head())
+df1.head()
+
+from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+X_train, X_test, y_train, y_test = train_test_split(df1['visited'], df1['nomadlist_recommends'], test_size=0.2, random_state=42)
+
+mlb = MultiLabelBinarizer()
+y_train_bin = mlb.fit_transform(y_train)
+model = make_pipeline(CountVectorizer(), MultiOutputClassifier(RandomForestClassifier()))
+model.fit(X_train.apply(lambda x: ' '.join(x)), y_train_bin)
+
+predictions_bin = model.predict(X_test.apply(lambda x: ' '.join(x)))
+predictions = mlb.inverse_transform(predictions_bin)
+
+
+accuracies = []
+
+for true_labels, predicted_labels in zip(y_test, predictions):
+    accuracy = sum(label in predicted_labels for label in true_labels) / max(len(true_labels), 1)
+    accuracies.append(accuracy)
+
+average_accuracy = sum(accuracies) / len(accuracies)
+
+print(f"Average Accuracy: {average_accuracy}")
+
+
+# Function to recommend countries based on user input
+def recommend_cities():
+    while True:
+        # Get user input
+        user_input = input("Enter the cities you have visited (comma-separated): ")
+        user_cities = [city.strip() for city in user_input.split(',')]
+
+        # Check if all input cities are known
+        unknown_cities = set(user_cities) - known_cities
+
+        if not unknown_cities:
+            # All input cities are known, proceed with recommendations
+
+            # Predict based on user input
+            input_str = ' '.join(user_cities)
+            prediction_bin = model.predict([input_str])
+            prediction = mlb.inverse_transform(prediction_bin)
+
+            # Print the recommended countries
+            print("Recommended cities to visit:")
+            for city in prediction[0][:5]:
+                print(city)
+
+            break  # Exit the loop if valid input is received
+        else:
+            print("Some input cities are not known:")
+            print(', '.join(unknown_cities))
+            print("Please enter valid cities.")
+#Get all known countries
+known_cities = set(city for cities_list in pd.concat([X_train, X_test, y_train, y_test]) for city in cities_list)
+
+# Make recommendations based on user input
+recommend_cities()
 import datetime
 import src.common.coefficients2 as c
 import googlemaps
@@ -132,6 +208,8 @@ if __name__ == '__main__':
                         emissions = distance * transport_emission_coefficient_dict["Flight Economy"]
                     elif flight_class == "Premium":
                         pass
+                    elif flight_class == "First":
+                        emissions = distance * transport_emission_coefficient_dict["Flight First"]
                     else:
                         received_valid_input = False
 
