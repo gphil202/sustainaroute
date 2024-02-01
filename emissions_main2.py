@@ -74,6 +74,7 @@ known_cities = set(city for cities_list in pd.concat([X_train, X_test, y_train, 
 
 # Make recommendations based on user input
 recommend_cities()
+
 import datetime
 import src.common.coefficients2 as c
 import googlemaps
@@ -143,6 +144,8 @@ def create_driving_leg(mode: str = "") -> tuple:
         minute = input("Please enter the minute when you like to depart ")
         query["departure_time"] = datetime.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour),
                                                    minute=int(minute))
+    car_type = input("Which fuel type do you use? Choose from Petrol or Diesel ")
+
 
     gmaps = googlemaps.Client(key='AIzaSyA27-jm6gjzs_sQqdiuPM8ZsWaTTItBEMw')
     directions_result = gmaps.directions(query["origin"],
@@ -155,7 +158,12 @@ def create_driving_leg(mode: str = "") -> tuple:
     for _, leg in enumerate(primary_query['legs']):
         for step in leg["steps"]:
             if step["travel_mode"] == "DRIVING":
-                query_emissions += (step["distance"]["value"] / 1000) * 0.19 # transport_emission_coefficient_dict[""]
+                if car_type == "Petrol":
+                    query_emissions += (step['distance']['value'] / 1000) * transport_emission_coefficient_dict['Petrol Car']
+                elif car_type == "Diesel":
+                    query_emissions += (step['distance']['value'] / 1000) * transport_emission_coefficient_dict['Diesel Car']
+                else:
+                    query_emissions += 0 #TODO:transport_emission_coefficient_dict[""]
             elif step["travel_mode"] == "TRANSIT":
                 query_emissions += (step["distance"]["value"] / 1000) * 0.05 # transport_emission_coefficient_dict[]
             elif step["travel_mode"] == "CYCLING":
