@@ -3,7 +3,7 @@ data_file = "src/machine_learning/helper_scripts/nomadlist_travel_info_separated
 df = pd.read_csv(data_file)
 df.head()
 
-df1 = df.iloc[:,[1,3]]
+df1 = df.iloc[:,[1,3]].copy()
 df1.head()
 
 df1['visited'] = df1['cities_visited'].apply(lambda x: eval(x))
@@ -17,7 +17,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.pipeline import make_pipeline
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
 
 X_train, X_test, y_train, y_test = train_test_split(df1['visited'], df1['nomadlist_recommends'], test_size=0.2, random_state=42)
 
@@ -88,8 +87,7 @@ transport_emission_coefficient_dict: dict = {
         'Flight Premium Economy': c.AirTravelEmissionsPerPassengerKm.PREMIUM_ECONOMY_AVERAGE.value,
         'Flight Business': c.AirTravelEmissionsPerPassengerKm.BUSINESS_AVERAGE.value,
         'Flight First': c.AirTravelEmissionsPerPassengerKm.FIRST_AVERAGE.value,
-        'Domestic Train': c.Rail.UK_DOMESTIC.value,
-        'International Train': c.Rail.INTERNATIONAL.value
+        'Transit Average': c.Rail.Transit_average
 }
 
 from geopy.geocoders import Nominatim
@@ -142,10 +140,8 @@ def create_driving_leg(mode: str = "") -> tuple:
         day = input("Please enter the day of your journey ")
         hour = input("Please enter the hour when you like to depart (24h-format) ")
         minute = input("Please enter the minute when you like to depart ")
-        query["departure_time"] = datetime.datetime(year=int(year), month=int(month), day=int(day), hour=int(hour),
+        query["departure_time"] = datetime(year=int(year), month=int(month), day=int(day), hour=int(hour),
                                                    minute=int(minute))
-    car_type = input("Which fuel type do you use? Choose from Petrol or Diesel ")
-
 
     gmaps = googlemaps.Client(key='AIzaSyA27-jm6gjzs_sQqdiuPM8ZsWaTTItBEMw')
     directions_result = gmaps.directions(query["origin"],
@@ -158,22 +154,21 @@ def create_driving_leg(mode: str = "") -> tuple:
     for _, leg in enumerate(primary_query['legs']):
         for step in leg["steps"]:
             if step["travel_mode"] == "DRIVING":
-                if car_type == "Petrol":
-                    query_emissions += (step['distance']['value'] / 1000) * transport_emission_coefficient_dict['Petrol Car']
-                elif car_type == "Diesel":
-                    query_emissions += (step['distance']['value'] / 1000) * transport_emission_coefficient_dict['Diesel Car']
+                if fuel_type == "Petrol":
+                    query_emissions += (step['distance']['value'] / 1000) * transport_emission_coefficient_dict[
+                        'Petrol Car']
+                elif fuel_type == "Diesel":
+                    query_emissions += (step['distance']['value'] / 1000) * transport_emission_coefficient_dict[
+                        'Diesel Car']
                 else:
-                    query_emissions += 0 #TODO:transport_emission_coefficient_dict[""]
+                    query_emissions += 0  # TODO: Add the appropriate default value or handle the case when the fuel type is neither Petrol nor Diesel
             elif step["travel_mode"] == "TRANSIT":
-                query_emissions += (step["distance"]["value"] / 1000) * 0.05 # transport_emission_coefficient_dict[]
-            elif step["travel_mode"] == "CYCLING":
-                query_emissions += 0
-            elif step["travel_mode"] == "WALKING":
-                query_emissions += 0
+                query_emissions += (step["distance"][
+                                        "value"] / 1000) * transport_emission_coefficient_dict['Transit Average']
+            elif step["travel_mode"] in ["CYCLING", "WALKING"]:
+                query_emissions += 0  # No emissions for cycling or walking
             else:
-                query_emissions += 0
-
-
+                query_emissions += 0  # Handle other travel modes or update as needed
 
     return query["origin"], query["destination"], query_emissions
 
@@ -220,7 +215,11 @@ if __name__ == '__main__':
 
         # Should we add a function for bicycling or walking here which doesn't calculate any emissions but just
         # displays info on its leg? Happy to do that :)
-        elif option == "transit" or option == "driving" or option == "walking" or option == "bicycling":
+        elif option == "transit"  or option == "walking" or option == "bicycling":
+            legs.append(create_driving_leg(option))
+
+        elif option == "driving":
+            fuel_type= input("Which fuel type do you use? Choose from Petrol or Diesel ")
             legs.append(create_driving_leg(option))
 
         elif option == "done":
